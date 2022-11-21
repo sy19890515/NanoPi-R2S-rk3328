@@ -112,7 +112,7 @@ jobs:
         make toolchain/compile -j$(nproc) || make toolchain/compile -j40
         make target/compile -j$(nproc) || make target/compile -j40 IGNORE_ERRORS=1
         make diffconfig
-        make package/compile -j1 IGNORE_ERRORS=1 || make package/compile -j40 IGNORE_ERRORS=1
+        make package/compile -j1 V=s IGNORE_ERRORS=1 || make package/compile -j40 IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
