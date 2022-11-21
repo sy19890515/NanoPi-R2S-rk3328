@@ -99,7 +99,7 @@ jobs:
       run: |
         cd $OPENWRTROOT
         cat .config
-        make download -j8
+        make download -j1
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
   
@@ -108,11 +108,11 @@ jobs:
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j$(nproc) || make tools/compile -j40
-        make toolchain/compile -j$(nproc) || make toolchain/compile -j40
-        make target/compile -j$(nproc) || make target/compile -j40 IGNORE_ERRORS=1
+        make tools/compile -j1 || make tools/compile -j1
+        make toolchain/compile -j1 || make toolchain/compile -j1
+        make target/compile -j1 || make target/compile -j1 IGNORE_ERRORS=1
         make diffconfig
-        make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j$(nproc) IGNORE_ERRORS=1
+        make package/compile -j1 IGNORE_ERRORS=1 || make package/compile -j1 IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
@@ -155,8 +155,8 @@ jobs:
         fi
         cp files/etc/opkg/distfeeds.conf.server files/etc/opkg/distfeeds.conf.mirror
         sed -i "s/http:\/\/192.168.123.100:2345\/snapshots/https:\/\/openwrt.cc\/snapshots\/$(date +"%Y-%m-%d")\/lean/g" files/etc/opkg/distfeeds.conf.mirror
-        make package/install -j$(nproc) || make package/install -j1 V=s
-        make target/install -j$(nproc) || make target/install -j1 V=s
+        make package/install -j1 || make package/install -j1 V=s
+        make target/install -j1 || make target/install -j1 V=s
         pushd bin/targets/rockchip/armv8
         rm -rf openwrt-rockchip-armv8-friendlyarm_nanopi-r2s.manifest
         rm -rf openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-rootfs.tar.gz
