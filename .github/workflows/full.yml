@@ -8,19 +8,19 @@
 
 name: NanoPi-R2S-全插件
 
-on: 
+on:
   release:
     types: [published]
 
   push:
-   branches: 
-     - skdir
+    branches:
+      - skdir
   repository_dispatch:
   workflow_dispatch:
-  #schedule:
-    #- cron: 0 17 * * *
-  # watch:
-  #   types: started
+#  schedule:
+#  - cron: 0 17 * * *
+#    watch:
+#      types: started
 
 env:
   REPO_URL: https://github.com/DHDAXCW/lede-rockchip
@@ -44,6 +44,24 @@ jobs:
       GENERATE_STATUS: ${{ steps.generate.outputs.GENERATE_STATUS }}
 
     steps:
+    - name: Maximize build space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 512
+        swap-size-mb: 1024
+        temp-reserve-mb: 1024
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+#    - name: Checkout
+#      uses: actions/checkout@v2
+
+    - name: Build
+      run: |
+        echo "Free space after removing swap:"
+        sudo df -h
+        echo "Current path:"
+        pwd
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -66,7 +84,7 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
-        
+
     - name: Update Feeds
       id: update
       run: |
@@ -83,7 +101,7 @@ jobs:
       run: |
         cd $OPENWRTROOT
         ./scripts/feeds install -a
-        
+
     - name: Load Custom Configuration
       run: |
         [ -e files ] && mv files $OPENWRTROOT/files
@@ -94,7 +112,7 @@ jobs:
         ../scripts/preset-clash-core.sh arm64
         ../scripts/preset-terminal-tools.sh
         make defconfig
-        
+
     - name: Download Package
       id: package
       run: |
@@ -103,17 +121,17 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-  
+
     - name: Compile Packages
       id: compile
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j$(nproc)
-        make toolchain/compile -j$(nproc)
-        make target/compile -j$(nproc)
+        make tools/compile -j$(nproc) || make tools/compile -j4
+        make toolchain/compile -j$(nproc) || make toolchain/compile -j4
+        make target/compile -j$(nproc) || make target/compile -j4 IGNORE_ERRORS=1
         make diffconfig
-        make package/compile -j$(nproc) IGNORE_ERRORS=1
+        make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j4 IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
@@ -130,7 +148,9 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "FIRMWARE=$PWD" >> $GITHUB_OUTPUT
         echo "COMPILE_STATUS=success" >> $GITHUB_OUTPUT
-        
+        echo "Free space after compiling:"
+        sudo df -h
+
     - name: Generate Firmware
       if: steps.compile.outputs.COMPILE_STATUS == 'success'
       id: generate
@@ -183,7 +203,7 @@ jobs:
                 slim   = 精简版
                 beggar = 乞丐版" >> release.txt
           echo "status=success" >> $GITHUB_OUTPUT
-          
+
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
