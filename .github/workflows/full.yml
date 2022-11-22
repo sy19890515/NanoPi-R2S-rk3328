@@ -53,6 +53,7 @@ jobs:
         [ -f /etc/issue.net ] && cat /etc/issue.net
         [ -f /etc/issue ] && cat /etc/issue
         ulimit -a
+        sudo apt install libfuse-dev
         
     - name: Clone Source Code
       run: |
