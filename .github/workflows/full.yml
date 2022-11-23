@@ -124,6 +124,8 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
+      with:
+          timeout-minutes: 3600
       id: compile
       run: |
         cd $OPENWRTROOT
