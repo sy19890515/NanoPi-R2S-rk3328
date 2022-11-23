@@ -33,7 +33,8 @@ env:
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    timeout-minutes: 720
+    runs-on: ubuntu-22.04
     if: github.repository == 'sy19890515/NanoPi-R2S-rk3328'
     outputs:
       OPENWRTROOT: ${{ steps.update.outputs.OPENWRTROOT }}
@@ -67,7 +68,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Initialization Environment
+    - name: Initialize Environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -80,12 +81,16 @@ jobs:
         [ -f /etc/issue ] && cat /etc/issue
         ulimit -a
         sudo apt install libfuse-dev
+        echo "Free space after initializing environment:"
+        sudo df -h
 
     - name: Clone Source Code
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
+        echo "Free space after cloning source code:"
+        sudo df -h
 
     - name: Update Feeds
       id: update
@@ -98,11 +103,15 @@ jobs:
         git clone --depth=1 https://github.com/DHDAXCW/luci customfeeds/luci
         chmod +x ../scripts/*.sh
         ../scripts/hook-feeds.sh
+        echo "Free space after updating feeds:"
+        sudo df -h
 
     - name: Install Feeds
       run: |
         cd $OPENWRTROOT
         ./scripts/feeds install -a
+        echo "Free space after installing feeds:"
+        sudo df -h
 
     - name: Load Custom Configuration
       run: |
@@ -114,6 +123,8 @@ jobs:
         ../scripts/preset-clash-core.sh arm64
         ../scripts/preset-terminal-tools.sh
         make defconfig
+        echo "Free space after loading custon configuration:"
+        sudo df -h
 
     - name: Download Package
       id: package
@@ -123,18 +134,20 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+        echo "Free space after downloading package:"
+        sudo df -h
 
     - name: Compile Packages
-      timeout-minutes: 3600
+      timeout-minutes: 720
       id: compile
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j$(nproc)
-        make toolchain/compile -j$(nproc)
-        make target/compile -j$(nproc) IGNORE_ERRORS=1
+        make tools/compile -j$(nproc) || make tools/compile -j8
+        make toolchain/compile -j$(nproc) || make toolchain/compile -j8
+        make target/compile -j$(nproc) || make target/compile -j8 IGNORE_ERRORS=1
         make diffconfig
-        make package/compile -j$(nproc) IGNORE_ERRORS=1
+        make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j8 IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
@@ -151,7 +164,7 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "FIRMWARE=$PWD" >> $GITHUB_OUTPUT
         echo "COMPILE_STATUS=success" >> $GITHUB_OUTPUT
-        echo "Free space after compiling:"
+        echo "Free space after compiling packages:"
         sudo df -h
 
     - name: Generate Firmware
@@ -192,6 +205,8 @@ jobs:
         make checksum
         mv bin/targets/rockchip/armv8/sha256sums bin/targets/rockchip/armv8/full-sha256sums
         echo "GENERATE_STATUS=success" >> $GITHUB_OUTPUT
+        echo "Free space after generating firmware:"
+        sudo df -h
 
     - name: Generate release tag
       id: tag
