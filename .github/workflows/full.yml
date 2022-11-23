@@ -136,6 +136,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
         echo "Free space after downloading package:"
         sudo df -h
+        du -ah --max-depth=1 .
 
     - name: Compile Packages
       timeout-minutes: 720
@@ -143,11 +144,11 @@ jobs:
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make make tools/compile -j12
-        make make toolchain/compile -j12
-        make make target/compile -j12 IGNORE_ERRORS=1
+        make make tools/compile -j10
+        make make toolchain/compile -j10
+        make make target/compile -j10 IGNORE_ERRORS=1
         make diffconfig
-        make make package/compile -j12 IGNORE_ERRORS=1
+        make make package/compile -j10 IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
