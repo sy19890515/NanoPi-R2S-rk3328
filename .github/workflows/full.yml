@@ -56,12 +56,13 @@ jobs:
 #    - name: Checkout
 #      uses: actions/checkout@v2
 
-    - name: Build
+    - name: Check build space
       run: |
         echo "Free space after removing swap:"
         sudo df -h
         echo "Current path:"
         pwd
+
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -127,11 +128,11 @@ jobs:
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j$(nproc) || make tools/compile -j4
-        make toolchain/compile -j$(nproc) || make toolchain/compile -j4
-        make target/compile -j$(nproc) || make target/compile -j4 IGNORE_ERRORS=1
+        make tools/compile -j8
+        make toolchain/compile -j8
+        make target/compile -j8 IGNORE_ERRORS=1
         make diffconfig
-        make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j4 IGNORE_ERRORS=1
+        make package/compile -j8 IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
