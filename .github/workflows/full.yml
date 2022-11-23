@@ -33,6 +33,7 @@ env:
 
 jobs:
   Build:
+    timeout-minutes: 3600
     runs-on: ubuntu-latest
     if: github.repository == 'sy19890515/NanoPi-R2S-rk3328'
     outputs:
@@ -124,8 +125,6 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
-      with:
-          timeout-minutes: 3600
       id: compile
       run: |
         cd $OPENWRTROOT
