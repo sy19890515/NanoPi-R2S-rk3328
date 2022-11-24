@@ -33,7 +33,7 @@ env:
 
 jobs:
   Build:
-    timeout-minutes: 1
+    timeout-minutes: 1440
     runs-on: self-hosted
     if: github.repository == 'sy19890515/NanoPi-R2S-rk3328'
     outputs:
