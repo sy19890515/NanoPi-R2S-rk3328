@@ -143,8 +143,8 @@ jobs:
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j8 IGNORE_ERRORS=1
-        make toolchain/compile -j8 IGNORE_ERRORS=1
+        make tools/compile -j8
+        make toolchain/compile -j8
         make target/compile -j8 IGNORE_ERRORS=1
         make diffconfig
         make package/compile -j8 IGNORE_ERRORS=1
