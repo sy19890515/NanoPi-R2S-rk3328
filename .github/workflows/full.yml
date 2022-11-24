@@ -33,8 +33,8 @@ env:
 
 jobs:
   Build:
-    timeout-minutes: 720
-    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    runs-on: self-hosted
     if: github.repository == 'sy19890515/NanoPi-R2S-rk3328'
     outputs:
       OPENWRTROOT: ${{ steps.update.outputs.OPENWRTROOT }}
@@ -138,16 +138,16 @@ jobs:
         sudo df -h
 
     - name: Compile Packages
-      timeout-minutes: 720
+#      timeout-minutes: 540
       id: compile
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j8
-        make toolchain/compile -j8
-        make target/compile -j8 IGNORE_ERRORS=1
+        make tools/compile -j$(nproc)
+        make toolchain/compile -j$(nproc)
+        make target/compile -j$(nproc) IGNORE_ERRORS=1
         make diffconfig
-        make package/compile -j8 IGNORE_ERRORS=1
+        make package/compile -j$(nproc) IGNORE_ERRORS=1
         make package/index
         cd $OPENWRTROOT/bin/packages/*
         PLATFORM=$(basename `pwd`)
