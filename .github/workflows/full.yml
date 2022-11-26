@@ -14,7 +14,7 @@ on:
 
   push:
     branches:
-      - skdir
+      - skdir-github-host
   repository_dispatch:
   workflow_dispatch:
 #  schedule:
@@ -47,9 +47,6 @@ jobs:
       GENERATE_STATUS: ${{ steps.generate.outputs.GENERATE_STATUS }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
     - name: Initialize Environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -85,6 +82,9 @@ jobs:
         remove-haskell: 'true'
 #    - name: Checkout
 #      uses: actions/checkout@v2
+
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Check build space
       run: |
