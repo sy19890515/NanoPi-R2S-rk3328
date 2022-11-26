@@ -109,11 +109,6 @@ svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt/aliyundr
 svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt/luci-app-aliyundrive-webdav
 popd
 
-# Add Pandownload
-pushd package/lean
-svn export https://github.com/immortalwrt/packages/trunk/net/pandownload-fake-server
-popd
-
 # Mod zzz-default-settings
 pushd package/lean/default-settings/files
 sed -i '/http/d' zzz-default-settings
