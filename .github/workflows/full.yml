@@ -23,8 +23,12 @@ on:
 #      types: started
 
 env:
-  REPO_URL: https://github.com/DHDAXCW/lede-rockchip
-  REPO_BRANCH: stable
+  SOURCE_REPO_URL: https://github.com/DHDAXCW/lede-rockchip
+  SOURCE_REPO_BRANCH: stable
+  PACKAGES_REPO_URL: https://github.com/sy19890515/openwrt-packages-official
+  PACKAGES_REPO_BRANCH: openwrt-22.03
+  LUCI_REPO_URL: https://github.com/sy19890515/openwrt-luci-official
+  LUCI_REPO_BRANCH: openwrt-22.03
   CONFIG_FILE: configs/lean/lean.config
   DIY_SH: scripts/lean.sh
   KMODS_IN_FIRMWARE: true
@@ -97,7 +101,7 @@ jobs:
     - name: Clone Source Code
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone $SOURCE_REPO_URL -b $SOURCE_REPO_BRANCH openwrt
         cd openwrt
         echo "Free space after cloning source code:"
         sudo df -h
@@ -109,8 +113,8 @@ jobs:
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "OPENWRTROOT=$PWD" >> $GITHUB_OUTPUT
         mkdir customfeeds
-        git clone --depth=1 -b openwrt-22.03 https://github.com/sy19890515/openwrt-packages-official customfeeds/packages
-        git clone --depth=1 -b openwrt-22.03 https://github.com/sy19890515/openwrt-luci-official customfeeds/luci
+        git clone --depth=1 $PACKAGES_REPO_URL -b $PACKAGES_REPO_BRANCH customfeeds/packages
+        git clone --depth=1 $LUCI_REPO_URL -b $LUCI_REPO_BRANCH customfeeds/luci
         chmod +x ../scripts/*.sh
         ../scripts/hook-feeds.sh
         echo "Free space after updating feeds:"
