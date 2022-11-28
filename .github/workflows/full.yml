@@ -153,9 +153,9 @@ jobs:
       run: |
         cd $OPENWRTROOT
         echo -e "$(nproc) thread compile"
-        make tools/compile -j$(nproc) IGNORE_ERRORS=1 || make tools/compile -1 V=sc
-        make toolchain/compile -j$(nproc) IGNORE_ERRORS=1 || make toolchain/compile -1 V=sc
-        make target/compile -j$(nproc) IGNORE_ERRORS=1 || make target/compile -1 V=sc
+        make tools/compile -j$(nproc) IGNORE_ERRORS=1
+        make toolchain/compile -j$(nproc) IGNORE_ERRORS=1
+        make target/compile -j$(nproc) IGNORE_ERRORS=1
         make diffconfig
         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -1 V=sc
         make package/index
