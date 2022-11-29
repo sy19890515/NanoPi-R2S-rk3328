@@ -98,6 +98,10 @@ jobs:
         echo "Free space after initializing environment:"
         sudo df -h
 
+    - name: Check Go Version
+      run: |
+        go version
+
     - name: Clone Source Code
       run: |
         df -hT $PWD
